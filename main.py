@@ -5,6 +5,7 @@ import callback
 
 if __name__ == "__main__":
 	print('start time of zkcli '+time.strftime('%X'))
+	print('ver')
 	asyncio.run(callback.callback(123))
 
 
