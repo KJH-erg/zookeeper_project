@@ -1,6 +1,5 @@
 from google.cloud import storage
-import os
-os.environ["GOOGLE_APPLICATION_CREDENTIALS"]="./quick-replica-330115-aa2bd2f50a7c.json"
+
 client = storage.Client()
 # https://console.cloud.google.com/storage/browser/[bucket-id]/
 bucket = client.get_bucket('zookeeper_project')
