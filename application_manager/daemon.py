@@ -1,5 +1,4 @@
 import asyncio
-import zkcli
 import time
 from kazoo.client import KazooState
 from kazoo.client import KazooClient

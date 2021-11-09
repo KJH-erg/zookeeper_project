@@ -1,14 +1,14 @@
 
 import time
 import asyncio
-import commons.daemon
+import daemon
 import os
 
 if __name__ == "__main__":
-	os.environ["GOOGLE_APPLICATION_CREDENTIALS"]="./donot/quick-replica-330115-aa2bd2f50a7c.json"
-	print('start time of zkcli '+time.strftime('%X'))
-	asyncio.run(daemon.main(123))
-
+	os.environ["GOOGLE_APPLICATION_CREDENTIALS"]="../donot/quick-replica-330115-aa2bd2f50a7c.json"
+	print('worker server starts '+time.strftime('%X'))
+	asyncio.run(daemon.main('localhost'))
+# 10.178.0.9,10.178.0.10,10.178.0.11
 
 # def my_listener(state):
 # 	if state == KazooState.LOST:

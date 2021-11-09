@@ -6,7 +6,7 @@ def restart_VM(mem):
     print('restart'+str(mem))
     #restart api for vm
 
-def add_input_logic(path,zk,input_lock):
+def add_input_logic(path,zk,input_barrier):
     # self.client.download_blob(path)
     client = google.googleAPI()
     try:
@@ -20,24 +20,22 @@ def add_input_logic(path,zk,input_lock):
         
         # with input_lock:
         #     print('asd')
-        input_lock.create()
-        print('enter')
+        input_barrier.create()
         for item in data:
-            print(item)
             zk.create("/inputs/",item.encode(encoding='utf-8'),sequence=True)
-        input_lock.remove()
+        input_barrier.remove()
     except:
         pass
 
 
-def main(i,zk,input_lock):
+def main(i,zk,input_barrier):
     if i == "status":
         print(zk.client_state)
 
-    if i == "add":
+    elif i == "add":
         print('please type URI of bucket for csv input')
         path = input()
-        add_input_logic(path,zk,input_lock)     
+        add_input_logic(path,zk,input_barrier)     
     else:
         print('invalid input')
 
