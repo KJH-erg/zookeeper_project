@@ -38,9 +38,13 @@ async def main(ip):
     '''
     Daemon for application manager
     '''
-    zk = KazooClient(hosts='localhost:2181')
+    zk = KazooClient(hosts=ip)
     zk.add_listener(my_listener)
     zk.start()
+    #initial nodes
+    zk.ensure_path("/inputs")
+    zk.ensure_path("/result")
+    zk.ensure_path("/members")
     #znode lock for inputs
     input_barrier = zk.Barrier("/inputs/")
     #znode lock for ended inputs
@@ -51,18 +55,26 @@ async def main(ip):
     #get initial members in zkserver
     for member in zk.get_children('/members'):
         membership('add',member)
-    
+
     #watch for membership
     @zk.ChildrenWatch("/members")
     def watch_member(children):
         member = membership('init','NAN')
-        changed = set(members).difference(children)
+        original_mem = len(member)
+        
+        changed_mem = len(children)
         #if node is deleted execute restart logic
-        if len(changed) != 0:
+        if changed_mem < original_mem:
+            changed = set(members).difference(children)
             changed = ''.join(changed)
             logics.restart_VM(changed)
             membership('delete',str(changed))
-    
+        #node is added add new node to members
+        elif changed_mem > original_mem:
+            changed = set(children).difference(members)
+            membership('add',str(changed))
+            print('new member is added {mem}'.format(mem = str(changed)))
+
         
     # @zk.ChildrenWatch("/result")
     # def watch_result(children):

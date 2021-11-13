@@ -7,7 +7,7 @@ import os
 if __name__ == "__main__":
 	os.environ["GOOGLE_APPLICATION_CREDENTIALS"]="../donot/quick-replica-330115-aa2bd2f50a7c.json"
 	print('start time of zkcli '+time.strftime('%X'))
-	asyncio.run(daemon.main(123))
+	asyncio.run(daemon.main(['10.178.0.9:2181','10.178.0.10:2181','10.178.0.11:2181']))
 
 
 # def my_listener(state):
