@@ -46,7 +46,7 @@ async def main(ip):
     zk.ensure_path("/result")
     zk.ensure_path("/members")
     #znode lock for inputs
-    input_barrier = zk.Barrier("/inputs/")
+    input_lock = zk.Lock("/inputs/")
     #znode lock for ended inputs
     result_lock= zk.Lock('/result')
     #znode lock for membership
@@ -83,7 +83,7 @@ async def main(ip):
     
     while True:
         flag = asyncio.Event()
-        asyncio.create_task(shell_input(flag,zk,input_barrier))
+        asyncio.create_task(shell_input(flag,zk,input_lock))
         await flag.wait()
 
 
