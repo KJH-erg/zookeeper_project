@@ -9,6 +9,7 @@ import socket
 from kazoo.retry import KazooRetry
 from kazoo.recipe.watchers import PatientChildrenWatch
 import time
+from googleAPI import googleAPI
 import kazoo.exceptions
 import run
 members = []
@@ -20,52 +21,48 @@ ip_table ={
     '10.178.0.3':'5',
     '172.30.1.58':'local1'
 }
-def my_callback(async_obj):
-    print('enter')
-    try:
-        children = async_obj.get()
-        print(children)
-    except:
-        print('error')
-def membership(flag, input):
-    if flag =='add':
-        members.append(input)
-    elif flag == 'delete':
-        members.remove(input)
-    else:
-        pass
-    return members
-
-
 
 async def execute_run(zk,worker,children):
     while True:
-        children = zk.get_children('/inputs')
         if len(children) == 0:
             print('no inputs anymore wait for inputs')
             watcher = PatientChildrenWatch(zk, '/inputs',
-                               time_boundary=20)
+                               time_boundary=10)
             async_object = watcher.start()
             children, child_async = async_object.get()
         else:
+            #get one input
             i = random.choice(children)
+            path = "/inputs/"+str(i)
+            #if locked wait for 5 seconds
             try:
-                lock = zk.Lock("/inputs/"+str(i), worker)
+                lock = zk.Lock(path, worker)
                 lock.acquire(timeout=5)
+                print(lock)
+            #if lock is acquired move to another input
             except kazoo.exceptions.LockTimeout:
                 print(str(i)+' is passed')
+                children.remove(i)
                 continue
+            #after lock
             data, stat = zk.get("/inputs/"+str(i))
-            print('finished'+str(i))
             print("Version: %s, data: %s" % (stat.version, data.decode("utf-8")))
-            flag = asyncio.Event()
-            asyncio.create_task(run.main(flag,data))
-            await flag.wait()
-            zk.create("/result/"+str(i))
+            #async job for main_run
+            main_run_flag = asyncio.Event()
+            asyncio.create_task(run.main(main_run_flag,data))
+            await main_run_flag.wait()
             
-            async_obj = zk.delete_async("/inputs/"+str(i))
-            async_obj.rawlink(my_callback)
-            lock.release()
+            #delete input 
+            lock_till_delete = asyncio.Event()
+            asyncio.create_task(logics.delete_node(lock_till_delete,zk,path,lock))
+            await lock_till_delete.wait()
+            #create result with worker_id
+            try:
+                zk.ensure_path("/result/"+str(i))
+            except:
+                zk.set("/result/"+str(i),worker_id.encode(encoding='utf-8'))
+            #refresh input list
+            children = zk.get_children('/inputs')
             
             
             
@@ -99,22 +96,11 @@ async def main(ip):
 
     
     
-    #watch for membership
-    # @zk.ChildrenWatch("/members")
-    # def watch_member(children):
-    #     member = membership('init','NAN')
-    #     changed = set(members).difference(children)
-    #     #if node is deleted execute restart logic
-    #     if len(changed) != 0:
-    #         changed = ''.join(changed)
-    #         logics.restart_VM(changed)
-    #         membership('delete',str(changed))
-    
-        
-    # @zk.ChildrenWatch("/result")
-    # def watch_result(children):
-    #     print("Children are now: %s" % children)
-    #     logics.remove_completed_input()
+    @zk.DataWatch("/exec")
+    def watch_node(data, stat):
+        client = googleAPI()
+        client.download_blob(data)
+        print("Version: %s, data: %s" % (stat.version, data.decode("utf-8")))
     
     while True:
         children = zk.get_children('/inputs')

@@ -5,9 +5,11 @@ class googleAPI():
 
     def download_blob(self,source_blob_name):
         try:
+            source_blob_name = source_blob_name.decode('utf-8')
             bucket = self.storage_client.bucket('zookeeper_project')
-            dest = './csv_tmp/'+source_blob_name
-            blob = bucket.blob('csv/'+source_blob_name)
+            dest = './run_main.py'
+            blob = bucket.blob('run_files/'+source_blob_name)
+            
             blob.download_to_filename(dest)
             print('Downloaded storage object '+source_blob_name+' is downloaded')
         except:

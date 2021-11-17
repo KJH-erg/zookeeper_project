@@ -45,6 +45,7 @@ async def main(ip):
     zk.ensure_path("/inputs")
     zk.ensure_path("/result")
     zk.ensure_path("/members")
+    zk.ensure_path("/exec")
     #znode lock for inputs
     input_lock = zk.Lock("/inputs/")
     #znode lock for ended inputs

@@ -5,6 +5,9 @@ import googleAPI as google
 def restart_VM(mem):
     print('restart'+str(mem))
     #restart api for vm
+def add_run_logic(path,zk,input_lock):
+    print(path)
+    zk.set('/exec',path.encode(encoding='utf-8'))
 
 def add_input_logic(path,zk,input_lock):
     # self.client.download_blob(path)
@@ -36,6 +39,10 @@ def main(i,zk,input_lock):
         print('please type URI of bucket for csv input')
         path = input()
         add_input_logic(path,zk,input_lock)     
+    elif i == 'run':
+        print('please type URI of bucket for run file')
+        path = input()
+        add_run_logic(path,zk,input_lock)  
     else:
         print('invalid input')
 
