@@ -26,7 +26,33 @@ sends inputs and run file to application manager
 4. worker server
 - execute run file and store the data
 
-Disaster planing and plan to recovery
+/applcation_manager
+main.py
+daemon for maintaining connection with zookeeper server
+watches are set,too
+API.py
+all logics like membership and add inputs
+googleAPI
+all googleAPIs for GCP like download blob and restart VM
+zk_cli.py
+initial setups for zookeeper server
+membership.py
+control inner membership
+
+/worker_cli
+main.py
+daemon for maintaining connection with zookeeper server
+watches are set,too
+googleAPI
+all googleAPIs for GCP like download blob and restart VM
+run.py
+ayncio method to wait for the end of run.main file
+run_main.py
+main logic downloaded from user
+znode_modify.py
+all logics like get inputs move to process node
+lock setting move to result node and nodes deletion
+
 
 
 
